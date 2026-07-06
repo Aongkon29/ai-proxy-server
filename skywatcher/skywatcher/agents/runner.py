@@ -31,9 +31,13 @@ def ask(query: str, *, user_id: str = "capstone_user") -> str:
         return _fallback_response(query)
     if not settings.has_api_key:
         return (
-            "Skywatcher needs a Gemini API key to run the agent.\n"
-            "Get a free key at https://aistudio.google.com/apikey, then set\n"
-            "GEMINI_API_KEY in your .env file or environment.\n\n"
+            "Skywatcher needs an LLM API key to run the agent.\n"
+            "Option A — Gemini (free, but geo-blocked in some regions):\n"
+            "  Get a key at https://aistudio.google.com/apikey, then set\n"
+            "  GEMINI_API_KEY in your .env file.\n"
+            "Option B — DeepSeek (works globally, OpenAI-compatible):\n"
+            "  Get a key at https://platform.deepseek.com, then set\n"
+            "  DEEPSEEK_API_KEY in your .env file.\n\n"
             "The non-LLM tools (CelesTrak fetch, pass prediction) still work:\n"
             "  skywatcher list-sats --category visual\n"
             "  skywatcher passes 'ISS' --lat 40.0 --lon -105.3"

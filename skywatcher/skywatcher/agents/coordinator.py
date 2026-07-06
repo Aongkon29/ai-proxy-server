@@ -48,15 +48,16 @@ RULES:
 Begin every session with a one-line greeting the first time, then get to work."""
 
 
-def build_coordinator(model: str | None = None) -> "Agent":
+def build_coordinator(model=None) -> "Agent":
     """Build the root coordinator agent with all specialists wired as sub-agents.
 
     Args:
-        model: Gemini model name. Defaults to settings.gemini_model.
+        model: Model name (Gemini) or LiteLlm wrapper (DeepSeek/etc).
+               Defaults to settings.llm_model (auto-selects provider).
     """
     from ..config import settings
 
-    model = model or settings.gemini_model
+    model = model or settings.llm_model
 
     # Build the specialists. Each is a full Agent with its own tools & prompt.
     satellite_data = build_satellite_data_agent(model)

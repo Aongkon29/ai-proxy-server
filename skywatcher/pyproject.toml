@@ -16,6 +16,8 @@ dependencies = [
     # LLM + Agent framework (Google Gemini + Agent Development Kit)
     "google-genai>=0.3.0",
     "google-adk>=0.0.2",
+    # LiteLLM: enables non-Gemini providers (DeepSeek, OpenAI, etc) via ADK
+    "litellm>=1.0",
     # Orbital mechanics
     "skyfield>=1.49",
     "sgp4>=2.21",

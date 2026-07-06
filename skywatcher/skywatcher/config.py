@@ -22,6 +22,10 @@ class Settings:
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
     gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
 
+    # DeepSeek (OpenAI-compatible) — used when Gemini is geo-blocked/unavailable.
+    deepseek_api_key: str = field(default_factory=lambda: os.getenv("DEEPSEEK_API_KEY", ""))
+    deepseek_model: str = field(default_factory=lambda: os.getenv("DEEPSEEK_MODEL", "deepseek-chat"))
+
     # Default observer location (Boulder, CO — a public, well-known astronomy spot).
     # Users override per-query; we never store personal addresses.
     default_lat: float = field(default_factory=lambda: float(os.getenv("DEFAULT_LAT", "40.014984")))
@@ -33,9 +37,35 @@ class Settings:
     cache_dir: Path = field(default_factory=lambda: Path(".cache"))
 
     @property
-    def has_api_key(self) -> bool:
-        """True if a Gemini key is configured."""
+    def has_gemini_key(self) -> bool:
+        """True if a real Gemini key is configured."""
         return bool(self.gemini_api_key and self.gemini_api_key != "your_gemini_api_key_here")
+
+    @property
+    def has_deepseek_key(self) -> bool:
+        """True if a DeepSeek API key is configured."""
+        return bool(self.deepseek_api_key and self.deepseek_api_key != "your_deepseek_api_key_here")
+
+    @property
+    def has_api_key(self) -> bool:
+        """True if any LLM provider key is configured."""
+        return self.has_gemini_key or self.has_deepseek_key
+
+    @property
+    def llm_model(self):
+        """Return the model object to pass to ADK's Agent(model=...).
+
+        - DeepSeek (via LiteLlm) takes priority, since it works globally and
+          Gemini is geo-blocked in some regions.
+        - Falls back to a Gemini model string (native ADK) if only a Gemini
+          key is set.
+        """
+        if self.has_deepseek_key:
+            from google.adk.models.lite_llm import LiteLlm
+
+            return LiteLlm(model=f"deepseek/{self.deepseek_model}")
+        # Native Gemini: ADK accepts the model name string directly.
+        return self.gemini_model
 
     def ensure_cache(self) -> Path:
         """Create and return the cache directory."""

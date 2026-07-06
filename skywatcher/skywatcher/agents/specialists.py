@@ -163,7 +163,7 @@ Keep answers focused: a few sentences for simple questions, a short paragraph
 for complex ones. Avoid speculation; if you're unsure, say so."""
 
 
-def build_satellite_data_agent(model: str) -> "Agent":
+def build_satellite_data_agent(model) -> "Agent":
     """The agent that finds & lists satellites."""
     return Agent(
         name="satellite_data",
@@ -173,7 +173,7 @@ def build_satellite_data_agent(model: str) -> "Agent":
     )
 
 
-def build_sky_math_agent(model: str) -> "Agent":
+def build_sky_math_agent(model) -> "Agent":
     """The agent that predicts passes & overhead satellites.
 
     NOTE: in a full deployment this agent would consume its tools via MCP
@@ -189,7 +189,7 @@ def build_sky_math_agent(model: str) -> "Agent":
     )
 
 
-def build_educator_agent(model: str) -> "Agent":
+def build_educator_agent(model) -> "Agent":
     """The agent that answers general space questions (no tools)."""
     return Agent(
         name="educator",
