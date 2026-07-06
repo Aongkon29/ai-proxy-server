@@ -20,7 +20,7 @@ class Settings:
     """Immutable runtime settings. Frozen so agents can't mutate config at runtime."""
 
     gemini_api_key: str = field(default_factory=lambda: os.getenv("GEMINI_API_KEY", ""))
-    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.0-flash"))
+    gemini_model: str = field(default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
 
     # Default observer location (Boulder, CO — a public, well-known astronomy spot).
     # Users override per-query; we never store personal addresses.
