@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skywatcher"
+version = "0.1.0"
+description = "A multi-agent AI companion that tracks satellites, predicts visible passes, and answers your questions about what's overhead."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Skywatcher"}]
+keywords = ["ai-agent", "satellite", "adk", "mcp", "gemini", "space"]
+
+dependencies = [
+    # LLM + Agent framework (Google Gemini + Agent Development Kit)
+    "google-genai>=0.3.0",
+    "google-adk>=0.0.2",
+    # Orbital mechanics
+    "skyfield>=1.49",
+    "sgp4>=2.21",
+    # HTTP + data
+    "httpx>=0.27",
+    "requests>=2.31",
+    # MCP server
+    "mcp>=1.0.0",
+    # CLI
+    "click>=8.1",
+    "rich>=13.7",
+    # Config
+    "python-dotenv>=1.0",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+skywatcher = "skywatcher.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["skywatcher*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

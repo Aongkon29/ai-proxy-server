@@ -1,0 +1,27 @@
+# docker-compose for Skywatcher.
+# Lets you run the agent or the MCP server with one command.
+#
+#   docker compose run --rm agent ask "When can I see the ISS from New York?"
+#   docker compose up mcp        # runs the MCP server on stdio
+#
+# Copy .env.example to .env and fill in GEMINI_API_KEY first.
+
+services:
+  agent:
+    build: .
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - DEFAULT_LAT=${DEFAULT_LAT:-40.014984}
+      - DEFAULT_LON=${DEFAULT_LON:--105.270546}
+    volumes:
+      - ./.cache:/app/.cache
+
+  mcp:
+    build: .
+    command: ["mcp", "serve"]
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    stdin_open: true
+    volumes:
+      - ./.cache:/app/.cache
