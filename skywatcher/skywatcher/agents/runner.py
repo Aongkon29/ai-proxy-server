@@ -59,6 +59,9 @@ async def _ask_async(query: str, user_id: str) -> str:
     from .coordinator import build_coordinator
 
     coordinator = build_coordinator()
+    # Debug: show which model/provider is active
+    model_info = coordinator.model
+    print(f"[skywatcher] Using model: {model_info}", flush=True)
     session_service = InMemorySessionService()
     session = await session_service.create_session(
         user_id=user_id, app_name="skywatcher"

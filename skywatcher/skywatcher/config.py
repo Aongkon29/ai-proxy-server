@@ -11,8 +11,14 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Load .env if present (local dev). In production, env vars come from the platform.
-load_dotenv()
+# Load .env from multiple locations to handle different working directories.
+# 1. Try the project root (skywatcher/.env — two levels up from this file)
+# 2. Fall back to the current working directory (standard load_dotenv behavior)
+_project_env = Path(__file__).resolve().parent.parent / ".env"
+if _project_env.exists():
+    load_dotenv(_project_env, override=True)
+else:
+    load_dotenv()
 
 
 @dataclass(frozen=True)
