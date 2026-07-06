@@ -2,7 +2,7 @@
 
 > A multi-agent AI companion that tracks recently launched satellites, predicts when they'll be visible from your location, and answers your questions about what's overhead.
 
-**Track:** Freestyle · **Built with:** Google ADK · MCP · Gemini · Skyfield · CelesTrak
+**Track:** Freestyle · **Built with:** Google ADK · MCP · Gemini/DeepSeek · Skyfield · CelesTrak
 
 ---
 
@@ -98,17 +98,19 @@ demonstrates **all 6**:
 
 ### Prerequisites
 - Python 3.10+
-- A free **Google Gemini API key** — get one at <https://aistudio.google.com/apikey>
+- An LLM API key — pick one:
+  - **Google Gemini** (free, but geo-blocked in some countries) — <https://aistudio.google.com/apikey>
+  - **DeepSeek** (works globally, OpenAI-compatible) — <https://platform.deepseek.com>
 
 ### Install
 
 ```bash
 git clone <your-repo-url> skywatcher
 cd skywatcher
-pip install -e .
+pip install -e ".[dev]"
 
 cp .env.example .env
-# edit .env and paste your GEMINI_API_KEY
+# edit .env and paste your API key (GEMINI_API_KEY and/or DEEPSEEK_API_KEY)
 ```
 
 ### Verify (no API key needed)
@@ -124,7 +126,7 @@ skywatcher list-sats -c visual  # lists bright satellites (needs internet)
 
 ## Usage
 
-### 1. Natural-language agent (needs `GEMINI_API_KEY`)
+### 1. Natural-language agent (needs `GEMINI_API_KEY` or `DEEPSEEK_API_KEY`)
 
 ```bash
 skywatcher ask "When can I see the ISS from New York?"
@@ -162,7 +164,10 @@ Then point your MCP client at this server. Example Claude Desktop config:
 
 ```bash
 docker build -t skywatcher .
+# With Gemini:
 docker run --rm -e GEMINI_API_KEY=your_key skywatcher ask "What's overhead right now from London?"
+# Or with DeepSeek (works globally):
+docker run --rm -e DEEPSEEK_API_KEY=your_key skywatcher ask "What's overhead right now from London?"
 # or via compose:
 docker compose run --rm agent ask "When can I see the ISS?"
 ```
@@ -200,8 +205,8 @@ TLE — they run **fully offline** and **without an API key**.
 
 ## Security Notes
 
-- **No secrets in code.** The only key (`GEMINI_API_KEY`) is read from the
-  environment. `.env` is gitignored.
+- **No secrets in code.** API keys (`GEMINI_API_KEY` and/or `DEEPSEEK_API_KEY`)
+  are read from the environment. `.env` is gitignored.
 - **No PII storage.** Observer location is used ephemerally for a calculation
   and discarded. Sessions are in-memory only.
 - **Input validation.** Coordinates are range-checked and NaN/inf-rejected;
@@ -214,7 +219,8 @@ TLE — they run **fully offline** and **without an API key**.
 
 - [CelesTrak](https://celestrak.org/) — free TLE orbital data (no API key).
 - [Skyfield](https://rhodesmill.org/skyfield/) — SGP4 propagation & astronomy.
-- [Google Gemini](https://aistudio.google.com/) — the agent LLM.
+- [Google Gemini](https://aistudio.google.com/) — agent LLM (primary).
+- [DeepSeek](https://platform.deepseek.com/) — alternative LLM (global availability).
 - [Google ADK](https://google.github.io/adk-docs/) — Agent Development Kit.
 - [MCP](https://modelcontextprotocol.io/) — Model Context Protocol.
 

@@ -3,7 +3,8 @@
 # deployment anyone can run with one command.
 #
 # Build:  docker build -t skywatcher .
-# Run:    docker run --rm -e GEMINI_API_KEY=... skywatcher ask "When can I see the ISS?"
+# Run:    docker run --rm -e DEEPSEEK_API_KEY=... skywatcher ask "When can I see the ISS?"
+#         (or -e GEMINI_API_KEY=... if Gemini is available in your region)
 
 FROM python:3.12-slim
 
@@ -27,7 +28,7 @@ ENV DEFAULT_LAT=40.014984 \
     DEFAULT_LON=-105.270546
 
 # The CLI is the entrypoint, so you can do:
-#   docker run --rm -e GEMINI_API_KEY=... skywatcher ask "..."
-#   docker run --rm -e GEMINI_API_KEY=... skywatcher passes "ISS" --lat 40 --lon -105
+#   docker run --rm -e DEEPSEEK_API_KEY=... skywatcher ask "..."
+#   docker run --rm -e DEEPSEEK_API_KEY=... skywatcher passes "ISS" --lat 40 --lon -105
 ENTRYPOINT ["skywatcher"]
 CMD ["--help"]
