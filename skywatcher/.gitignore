@@ -1,0 +1,30 @@
+# Secrets — NEVER commit
+.env
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Data cache (satellite TLEs are cached locally to be polite to CelesTrak)
+.cache/
+*.tle
+*.tled
