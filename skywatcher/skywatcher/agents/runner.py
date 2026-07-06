@@ -5,6 +5,7 @@ function. This is the bridge between the CLI/MCP layer and the agents.
 """
 from __future__ import annotations
 
+import asyncio
 from typing import Iterator
 
 from ..config import settings
@@ -38,26 +39,35 @@ def ask(query: str, *, user_id: str = "capstone_user") -> str:
             "  skywatcher passes 'ISS' --lat 40.0 --lon -105.3"
         )
 
-    # Import here so non-ADK environments can still import the package.
+    return asyncio.run(_ask_async(query, user_id))
+
+
+async def _ask_async(query: str, user_id: str) -> str:
+    """Async implementation of ask().
+
+    ADK 2.x made create_session() and runner.run_async() coroutine-based,
+    so we need an async implementation and bridge it from the sync ask().
+    """
     from google.adk.runners import Runner
     from google.adk.sessions import InMemorySessionService
+    from google.genai import types as genai_types
 
     from .coordinator import build_coordinator
 
     coordinator = build_coordinator()
     session_service = InMemorySessionService()
-    session = session_service.create_session(user_id=user_id, app_name="skywatcher")
+    session = await session_service.create_session(
+        user_id=user_id, app_name="skywatcher"
+    )
 
     runner = Runner(
         agent=coordinator, app_name="skywatcher", session_service=session_service
     )
 
     # ADK events: stream them, collect the final text response.
-    from google.genai import types as genai_types
-
     content = genai_types.Content(role="user", parts=[genai_types.Part(text=query)])
     final_text = ""
-    for event in runner.run(
+    async for event in runner.run_async(
         user_id=user_id, session_id=session.id, new_message=content
     ):
         # The coordinator's final answer comes as a text part.
@@ -76,27 +86,61 @@ def ask_stream(query: str, *, user_id: str = "capstone_user") -> Iterator[str]:
         yield ask(query, user_id=user_id)
         return
 
+    import queue
+    import threading
+
     from google.adk.runners import Runner
     from google.adk.sessions import InMemorySessionService
     from google.genai import types as genai_types
 
     from .coordinator import build_coordinator
 
-    coordinator = build_coordinator()
-    session_service = InMemorySessionService()
-    session = session_service.create_session(user_id=user_id, app_name="skywatcher")
-    runner = Runner(
-        agent=coordinator, app_name="skywatcher", session_service=session_service
-    )
+    result_queue: queue.Queue = queue.Queue()
 
-    content = genai_types.Content(role="user", parts=[genai_types.Part(text=query)])
-    for event in runner.run(
-        user_id=user_id, session_id=session.id, new_message=content
-    ):
-        if event.content and event.content.parts:
-            text = "".join(p.text for p in event.content.parts if p.text)
-            if text:
-                yield text
+    async def _run() -> None:
+        try:
+            coordinator = build_coordinator()
+            session_service = InMemorySessionService()
+            session = await session_service.create_session(
+                user_id=user_id, app_name="skywatcher"
+            )
+            runner = Runner(
+                agent=coordinator,
+                app_name="skywatcher",
+                session_service=session_service,
+            )
+            content = genai_types.Content(
+                role="user", parts=[genai_types.Part(text=query)]
+            )
+            async for event in runner.run_async(
+                user_id=user_id, session_id=session.id, new_message=content
+            ):
+                if event.content and event.content.parts:
+                    text = "".join(p.text for p in event.content.parts if p.text)
+                    if text:
+                        result_queue.put(text)
+        except Exception as e:
+            result_queue.put(e)
+        finally:
+            result_queue.put(None)  # sentinel — streaming done
+
+    # Run the async generator in a background thread so we can yield
+    # chunks synchronously to the caller.
+    loop = asyncio.new_event_loop()
+    thread = threading.Thread(target=lambda: loop.run_until_complete(_run()))
+    thread.start()
+
+    try:
+        while True:
+            item = result_queue.get()
+            if item is None:
+                break
+            if isinstance(item, Exception):
+                raise item
+            yield item
+    finally:
+        thread.join()
+        loop.close()
 
 
 def _fallback_response(query: str) -> str:
