@@ -1,6 +1,6 @@
-# AI Proxy Server
+# 🛰️ Skywatcher + AI Proxy — Orbit Intelligence & LLM Gateway
 
-A lightweight AI API proxy and multi-agent satellite tracking project.
+A multi-agent satellite tracking companion and a serverless AI API proxy — all in one repo.
 
 ## Overview
 
